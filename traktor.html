@@ -1,0 +1,3590 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Агротехнологічний симулятор</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#edf3eb;
+    color:#203025;
+}
+
+header{
+    background:#27652f;
+    color:white;
+    padding:22px;
+    text-align:center;
+}
+
+header h1{
+    margin:0 0 6px;
+}
+
+.container{
+    max-width:1550px;
+    margin:auto;
+    padding:20px;
+}
+
+.card{
+    background:#fff;
+    border-radius:12px;
+    padding:18px;
+    margin-bottom:18px;
+    box-shadow:0 3px 12px rgba(0,0,0,.08);
+}
+
+button{
+    border:0;
+    border-radius:8px;
+    padding:11px 16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:disabled{
+    cursor:not-allowed;
+    opacity:.5;
+}
+
+.green{
+    background:#287333;
+    color:white;
+}
+
+.gray{
+    background:#68746b;
+    color:white;
+}
+
+.red{
+    background:#b52c2c;
+    color:white;
+}
+
+.tabs{
+    display:flex;
+    gap:10px;
+    margin-bottom:18px;
+}
+
+.tab{
+    flex:1;
+    background:#d7e4d5;
+    color:#244128;
+}
+
+.tab.active{
+    background:#286d32;
+    color:white;
+}
+
+.layout{
+    display:grid;
+    grid-template-columns:320px 1fr;
+    gap:18px;
+}
+
+.stage-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.stage-btn{
+    width:100%;
+    text-align:left;
+    background:#edf2ec;
+    color:#263b29;
+}
+
+.stage-btn.active{
+    background:#2d7036;
+    color:white;
+}
+
+.stage-btn.done{
+    border-left:5px solid #159447;
+}
+
+.stage-btn.bad{
+    border-left:5px solid #d32f2f;
+}
+
+.small{
+    display:block;
+    font-size:12px;
+    margin-top:4px;
+    opacity:.75;
+}
+
+.limit{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 0;
+    border-bottom:1px solid #ddd;
+}
+
+.field-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
+
+.field-info{
+    background:#f5f8f4;
+    padding:15px;
+    border-radius:10px;
+}
+
+.field-shape{
+    min-height:260px;
+    background:#e8f2e4;
+    border-radius:10px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.field-shape svg{
+    width:100%;
+    max-width:500px;
+    height:250px;
+}
+
+.machine-type{
+    display:flex;
+    gap:10px;
+    margin-bottom:18px;
+}
+
+.machine-type button{
+    flex:1;
+}
+
+.machine-type button.active{
+    background:#286d32;
+    color:white;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+label{
+    display:block;
+    font-weight:bold;
+    margin-bottom:6px;
+}
+
+select{
+    width:100%;
+    padding:11px;
+    border:1px solid #c8d3c8;
+    border-radius:7px;
+    background:white;
+    font-size:15px;
+}
+
+.info-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:10px;
+    margin-top:16px;
+}
+
+.stat{
+    background:#f2f5f2;
+    padding:13px;
+    border-radius:8px;
+}
+
+.stat b{
+    display:block;
+    font-size:18px;
+    margin-top:5px;
+}
+
+.calculation{
+    margin-top:18px;
+    padding:18px;
+    background:#f7faf7;
+    border:1px solid #dce5dc;
+    border-radius:10px;
+}
+
+.calc-row{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    padding:11px 0;
+    border-bottom:1px solid #e0e5e0;
+}
+
+.calc-row:last-child{
+    border:0;
+}
+
+.action-row{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+}
+
+.result{
+    display:none;
+    margin-top:18px;
+    padding:18px;
+    border-radius:10px;
+}
+
+.result.show{
+    display:block;
+}
+
+.result.good{
+    background:#e8f7eb;
+    border:1px solid #8bc99a;
+}
+
+.result.bad{
+    background:#fff0f0;
+    border:1px solid #e0a0a0;
+}
+
+.result.warning{
+    background:#fff8df;
+    border:1px solid #e4c85d;
+}
+
+.error-list li{
+    margin-bottom:8px;
+}
+
+.progress{
+    height:12px;
+    background:#ddd;
+    border-radius:20px;
+    overflow:hidden;
+    margin-top:8px;
+}
+
+.progress-bar{
+    width:0;
+    height:100%;
+    background:#2e7035;
+}
+
+.log{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:1100px;
+}
+
+th,td{
+    padding:9px;
+    border-bottom:1px solid #ddd;
+    text-align:left;
+}
+
+.final{
+    text-align:center;
+    padding:30px;
+}
+
+.final-number{
+    font-size:75px;
+    font-weight:bold;
+    color:#28652f;
+}
+
+.hidden{
+    display:none;
+}
+
+.locked{
+    background:#eeeeee!important;
+    color:#777!important;
+}
+
+@media(max-width:1050px){
+
+    .layout{
+        grid-template-columns:1fr;
+    }
+
+    .info-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:700px){
+
+    .field-grid,
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .tabs,
+    .machine-type,
+    .action-row{
+        flex-direction:column;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<h1>🚜 Агротехнологічний симулятор</h1>
+
+<p>
+Вибір техніки • розрахунок • технологічні обмеження • оцінювання
+</p>
+
+</header>
+
+
+<div class="container">
+
+
+<div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+
+<button
+class="green"
+onclick="newGame()">
+🔄 Нові завдання
+</button>
+
+<button
+class="gray"
+onclick="resetCurrentStage()">
+↩ Скинути незавершений етап
+</button>
+
+</div>
+
+
+<div class="tabs">
+
+<button
+id="tab0"
+class="tab active"
+onclick="switchTask(0)">
+Завдання 1 — 4 етапи
+</button>
+
+<button
+id="tab1"
+class="tab"
+onclick="switchTask(1)">
+Завдання 2 — 7 етапів
+</button>
+
+</div>
+
+
+<div class="layout">
+
+
+<aside>
+
+
+<div class="card">
+
+<h3>📋 Умови етапу</h3>
+
+<div class="limit">
+<span>Макс. паливо</span>
+<b id="fuelLimit">—</b>
+</div>
+
+<div class="limit">
+<span>Макс. час</span>
+<b id="timeLimit">—</b>
+</div>
+
+<div class="limit">
+<span>Макс. відстань</span>
+<b id="distanceLimit">—</b>
+</div>
+
+<div class="limit">
+<span>Допустимий розхід</span>
+<b id="fuelHaLimit">—</b>
+</div>
+
+<p style="font-size:12px;color:#777">
+Під час виконання правильність вибору не показується.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3>📌 Етапи</h3>
+
+<div
+id="stageList"
+class="stage-list">
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>📊 Загальні показники</h3>
+
+<div class="stat">
+Загальна витрата палива
+<b id="totalFuel">0 л</b>
+</div>
+
+<br>
+
+<div class="stat">
+Загальний час
+<b id="totalTime">0 год 0 хв</b>
+</div>
+
+<br>
+
+<div class="stat">
+Загальна відстань
+<b id="totalKm">0 км</b>
+</div>
+
+</div>
+
+
+</aside>
+
+
+<main>
+
+
+<div class="card">
+
+<h2 id="stageTitle">
+Етап
+</h2>
+
+<p id="stageDescription"></p>
+
+
+<div class="field-grid">
+
+
+<div class="field-info">
+
+<h3>🌾 Поле</h3>
+
+<p>
+<b>Форма:</b>
+<span id="shape"></span>
+</p>
+
+<p>
+<b>Площа:</b>
+<span id="area"></span> га
+</p>
+
+<p>
+<b>Довжина:</b>
+<span id="length"></span> м
+</p>
+
+<p>
+<b>Ширина:</b>
+<span id="width"></span> м
+</p>
+
+<p>
+<b>Культура:</b>
+<span id="crop"></span>
+</p>
+
+<p>
+<b>Напрямок:</b>
+<span id="direction"></span>
+</p>
+
+</div>
+
+
+<div
+id="fieldShape"
+class="field-shape">
+</div>
+
+
+</div>
+
+</div>
+
+
+
+<div class="card">
+
+<h2>🚜 Вибір техніки</h2>
+
+
+<div class="machine-type">
+
+<button
+id="tractorBtn"
+class="green active"
+onclick="setMachineType('tractor')">
+🚜 Трактор
+</button>
+
+<button
+id="combineBtn"
+class="gray"
+onclick="setMachineType('combine')">
+🌾 Комбайн
+</button>
+
+</div>
+
+
+<div class="form-grid">
+
+
+<div>
+
+<label>
+Техніка
+</label>
+
+<select
+id="machine"
+onchange="calculate()">
+</select>
+
+</div>
+
+
+<div>
+
+<label>
+Навісне / жатка
+</label>
+
+<select
+id="implement"
+onchange="calculate()">
+</select>
+
+</div>
+
+
+</div>
+
+
+<div
+class="info-grid">
+
+
+<div class="stat">
+Потужність
+<b id="machinePower">—</b>
+</div>
+
+
+<div class="stat">
+Потрібна потужність
+<b id="neededPower">—</b>
+</div>
+
+
+<div class="stat">
+Робоча ширина
+<b id="workingWidth">—</b>
+</div>
+
+
+<div class="stat">
+Запас потужності
+<b id="powerReserve">—</b>
+</div>
+
+
+<div class="stat">
+Швидкість
+<b id="speed">—</b>
+</div>
+
+
+</div>
+
+
+
+<div class="calculation">
+
+<h3>🧮 Розрахунок</h3>
+
+
+<div class="calc-row">
+<span>Продуктивність</span>
+<b id="productivity">—</b>
+</div>
+
+
+<div class="calc-row">
+<span>Витрата палива за годину</span>
+<b id="fuelHour">—</b>
+</div>
+
+
+<div class="calc-row">
+<span>Розхід на гектар</span>
+<b id="fuelHa">—</b>
+</div>
+
+
+<div class="calc-row">
+<span>Загальна витрата палива</span>
+<b id="fuelTotal">—</b>
+</div>
+
+
+<div class="calc-row">
+<span>Час виконання</span>
+<b id="workTime">—</b>
+</div>
+
+
+<div class="calc-row">
+<span>Пройдена відстань</span>
+<b id="workKm">—</b>
+</div>
+
+
+<div style="margin-top:15px">
+
+<div style="display:flex;justify-content:space-between">
+
+<span>
+Використання ліміту палива
+</span>
+
+<b id="fuelPercent">
+0%
+</b>
+
+</div>
+
+<div class="progress">
+
+<div
+id="fuelBar"
+class="progress-bar">
+</div>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<div class="action-row">
+
+<button
+id="acceptBtn"
+class="green"
+onclick="finishStage()">
+
+✅ Завершити етап
+
+</button>
+
+</div>
+
+
+<div
+id="result"
+class="result">
+</div>
+
+
+</div>
+
+
+
+<div class="card log">
+
+<h2>📖 Журнал</h2>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Завдання</th>
+<th>Етап</th>
+<th>Техніка</th>
+<th>Обладнання</th>
+<th>Паливо</th>
+<th>Час</th>
+<th>Км</th>
+<th>Л/га</th>
+<th>Бал</th>
+
+</tr>
+
+</thead>
+
+<tbody id="journal">
+
+</tbody>
+
+</table>
+
+</div>
+
+
+
+<div
+id="finalBox"
+class="card final hidden">
+
+<h2>
+🏆 Підсумкова оцінка
+</h2>
+
+<div
+id="finalScore"
+class="final-number">
+—
+</div>
+
+<h3
+id="finalText">
+</h3>
+
+<p
+id="finalDetails">
+</p>
+
+</div>
+
+
+</main>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+/* =========================================================
+   ТРАКТОРИ
+========================================================= */
+
+const tractors=[
+
+{name:"МТЗ-82",power:81,fuel:16.5},
+{name:"МТЗ-892",power:89,fuel:17.5},
+{name:"МТЗ-952",power:95,fuel:18},
+{name:"МТЗ-1025",power:107,fuel:19},
+{name:"МТЗ-1221",power:130,fuel:22},
+{name:"МТЗ-1523",power:158,fuel:25},
+{name:"МТЗ-2022",power:212,fuel:32},
+
+{name:"John Deere 6130M",power:130,fuel:21},
+{name:"John Deere 6145M",power:145,fuel:23},
+{name:"John Deere 6155M",power:155,fuel:24},
+{name:"John Deere 6175M",power:175,fuel:27},
+{name:"John Deere 6195M",power:195,fuel:29},
+{name:"John Deere 6215R",power:215,fuel:31},
+{name:"John Deere 6230R",power:230,fuel:33},
+{name:"John Deere 6250R",power:250,fuel:35},
+{name:"John Deere 7R 290",power:290,fuel:40},
+{name:"John Deere 7R 310",power:310,fuel:42},
+{name:"John Deere 7R 350",power:350,fuel:46},
+{name:"John Deere 8R 370",power:370,fuel:48},
+{name:"John Deere 8R 410",power:410,fuel:52},
+
+{name:"Case IH Puma 150",power:150,fuel:24},
+{name:"Case IH Puma 165",power:165,fuel:26},
+{name:"Case IH Puma 185",power:185,fuel:28},
+{name:"Case IH Magnum 200",power:200,fuel:30},
+{name:"Case IH Magnum 245",power:245,fuel:34},
+{name:"Case IH Magnum 280",power:280,fuel:38},
+{name:"Case IH Magnum 310",power:310,fuel:42},
+{name:"Case IH Magnum 340",power:340,fuel:46},
+
+{name:"New Holland T6.180",power:175,fuel:27},
+{name:"New Holland T7.230",power:225,fuel:32},
+{name:"New Holland T7.270",power:270,fuel:37},
+{name:"New Holland T8.320",power:320,fuel:43},
+{name:"New Holland T8.380",power:380,fuel:49},
+{name:"New Holland T8.410",power:410,fuel:51},
+
+{name:"Fendt 516 Vario",power:165,fuel:25},
+{name:"Fendt 720 Vario",power:200,fuel:29},
+{name:"Fendt 724 Vario",power:237,fuel:32},
+{name:"Fendt 728 Vario",power:283,fuel:38},
+{name:"Fendt 828 Vario",power:287,fuel:39},
+{name:"Fendt 930 Vario",power:296,fuel:41},
+{name:"Fendt 942 Vario",power:415,fuel:53},
+
+{name:"Claas Arion 660",power:205,fuel:30},
+{name:"Claas Axion 830",power:235,fuel:32},
+{name:"Claas Axion 870",power:295,fuel:40},
+{name:"Claas Axion 930",power:355,fuel:46},
+{name:"Claas Axion 950",power:410,fuel:50},
+
+{name:"Valtra T235",power:235,fuel:33},
+{name:"Valtra S286",power:286,fuel:39},
+{name:"Valtra S416",power:416,fuel:52}
+
+];
+
+/* =========================================================
+   КОМБАЙНИ
+========================================================= */
+
+const combines=[
+
+{name:"John Deere W540",power:260,fuel:42},
+{name:"John Deere T550",power:275,fuel:45},
+{name:"John Deere T670",power:431,fuel:54},
+{name:"John Deere S770",power:449,fuel:57},
+{name:"John Deere S780",power:549,fuel:66},
+{name:"John Deere S790",power:582,fuel:70},
+{name:"John Deere X9 1000",power:700,fuel:82},
+
+{name:"Claas Tucano 430",power:313,fuel:44},
+{name:"Claas Tucano 560",power:354,fuel:49},
+{name:"Claas Lexion 6600",power:354,fuel:48},
+{name:"Claas Lexion 6700",power:408,fuel:53},
+{name:"Claas Lexion 7500",power:449,fuel:58},
+{name:"Claas Lexion 7600",power:549,fuel:64},
+{name:"Claas Lexion 7700",power:626,fuel:72},
+{name:"Claas Lexion 8900",power:790,fuel:82},
+
+{name:"New Holland CX6.80",power:272,fuel:43},
+{name:"New Holland CX7.90",power:354,fuel:49},
+{name:"New Holland CX8.80",power:449,fuel:57},
+{name:"New Holland CR8.90",power:449,fuel:58},
+{name:"New Holland CR9.90",power:550,fuel:67},
+{name:"New Holland CR10.90",power:652,fuel:76},
+{name:"New Holland CR11",power:775,fuel:84},
+
+{name:"Case IH Axial-Flow 6150",power:449,fuel:55},
+{name:"Case IH Axial-Flow 7250",power:402,fuel:53},
+{name:"Case IH Axial-Flow 8250",power:550,fuel:65},
+{name:"Case IH Axial-Flow 9250",power:550,fuel:67},
+
+{name:"Fendt Ideal 7",power:485,fuel:60},
+{name:"Fendt Ideal 8",power:581,fuel:69},
+{name:"Fendt Ideal 9",power:647,fuel:76},
+{name:"Fendt Ideal 10",power:790,fuel:82},
+
+{name:"Rostselmash RSM 161",power:300,fuel:46},
+{name:"Rostselmash Torum 785",power:360,fuel:51},
+{name:"Rostselmash Nova 330",power:330,fuel:48}
+
+];
+
+
+/* =========================================================
+   ВСЕ ОБЛАДНАННЯ
+   ВАЖЛИВО:
+   НІЯКОГО ФІЛЬТРУВАННЯ ПО ТИПУ ЕТАПУ
+========================================================= */
+
+const equipment=[
+/* =========================
+   ПЛУГИ
+========================= */
+
+{name:"Плуг — Lemken EurOpal 7",type:"plow",width:3.0,power:150,speed:7,fuel:27},
+{name:"Плуг — Lemken Diamant 10",type:"plow",width:4.0,power:220,speed:7,fuel:34},
+{name:"Плуг — Lemken Diamant 16",type:"plow",width:5.0,power:290,speed:7,fuel:42},
+{name:"Плуг — Kverneland 150 B",type:"plow",width:2.5,power:125,speed:7,fuel:23},
+{name:"Плуг — Kverneland 2300 S",type:"plow",width:3.5,power:175,speed:7,fuel:30},
+{name:"Плуг — Kverneland 3300 S",type:"plow",width:4.5,power:235,speed:7,fuel:38},
+{name:"Плуг — Gregoire-Besson RW8",type:"plow",width:3.2,power:165,speed:7,fuel:29},
+{name:"Плуг — Gregoire-Besson RW9",type:"plow",width:4.0,power:210,speed:7,fuel:35},
+{name:"Плуг — Gregoire-Besson RW10",type:"plow",width:5.0,power:270,speed:7,fuel:43},
+{name:"Плуг — KUHN Vari-Master 123",type:"plow",width:3.0,power:150,speed:7,fuel:26},
+{name:"Плуг — KUHN Vari-Master 153",type:"plow",width:4.0,power:210,speed:7,fuel:34},
+{name:"Плуг — KUHN Vari-Master 183",type:"plow",width:4.8,power:260,speed:7,fuel:41},
+
+/* =========================
+   КУЛЬТИВАТОРИ
+========================= */
+
+{name:"Культиватор — Horsch Terrano 3 FX",type:"cultivator",width:3,power:110,speed:10,fuel:11},
+{name:"Культиватор — Horsch Terrano 4 FX",type:"cultivator",width:4,power:150,speed:10,fuel:14},
+{name:"Культиватор — Horsch Terrano 5 FX",type:"cultivator",width:5,power:190,speed:10,fuel:17},
+{name:"Культиватор — Horsch Terrano 6 FX",type:"cultivator",width:6,power:230,speed:10,fuel:20},
+{name:"Культиватор — Horsch Terrano 8 FX",type:"cultivator",width:8,power:300,speed:10,fuel:26},
+{name:"Культиватор — Lemken Karat 9 400",type:"cultivator",width:4,power:145,speed:10,fuel:13},
+{name:"Культиватор — Lemken Karat 9 500",type:"cultivator",width:5,power:180,speed:10,fuel:16},
+{name:"Культиватор — Lemken Karat 9 600",type:"cultivator",width:6,power:220,speed:10,fuel:19},
+{name:"Культиватор — Lemken Karat 10 800",type:"cultivator",width:8,power:290,speed:10,fuel:25},
+{name:"Культиватор — Kuhn Cultimer L 300",type:"cultivator",width:3,power:110,speed:10,fuel:11},
+{name:"Культиватор — Kuhn Cultimer L 400",type:"cultivator",width:4,power:145,speed:10,fuel:14},
+{name:"Культиватор — Kuhn Cultimer L 500",type:"cultivator",width:5,power:180,speed:10,fuel:17},
+{name:"Культиватор — Kuhn Cultimer L 600",type:"cultivator",width:6,power:220,speed:10,fuel:20},
+{name:"Культиватор — Kuhn Cultimer L 800",type:"cultivator",width:8,power:285,speed:10,fuel:25},
+
+/* =========================
+   ДИСКОВІ БОРОНИ
+========================= */
+
+{name:"Дискова борона — Horsch Joker 4 RT",type:"disc",width:4,power:125,speed:10,fuel:13},
+{name:"Дискова борона — Horsch Joker 5 RT",type:"disc",width:5,power:155,speed:10,fuel:16},
+{name:"Дискова борона — Horsch Joker 6 RT",type:"disc",width:6,power:190,speed:10,fuel:19},
+{name:"Дискова борона — Horsch Joker 8 RT",type:"disc",width:8,power:250,speed:10,fuel:25},
+{name:"Дискова борона — Horsch Joker 10 RT",type:"disc",width:10,power:310,speed:10,fuel:31},
+{name:"Дискова борона — Lemken Rubin 9/400",type:"disc",width:4,power:125,speed:10,fuel:13},
+{name:"Дискова борона — Lemken Rubin 9/500",type:"disc",width:5,power:160,speed:10,fuel:16},
+{name:"Дискова борона — Lemken Rubin 9/600",type:"disc",width:6,power:195,speed:10,fuel:19},
+{name:"Дискова борона — Lemken Rubin 10/800",type:"disc",width:8,power:260,speed:10,fuel:25},
+{name:"Дискова борона — Lemken Rubin 10/1000",type:"disc",width:10,power:320,speed:10,fuel:31},
+{name:"Дискова борона — Kuhn Optimer 400",type:"disc",width:4,power:120,speed:10,fuel:13},
+{name:"Дискова борона — Kuhn Optimer 500",type:"disc",width:5,power:155,speed:10,fuel:16},
+{name:"Дискова борона — Kuhn Optimer 600",type:"disc",width:6,power:190,speed:10,fuel:19},
+{name:"Дискова борона — Kuhn Optimer 750",type:"disc",width:7.5,power:235,speed:10,fuel:23},
+
+/* =========================
+   ЗЕРНОВІ СІВАЛКИ
+========================= */
+
+{name:"Зернова сівалка — Amazone D9 2500",type:"seeder",width:2.5,power:65,speed:9,fuel:7,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова сівалка — Amazone D9 3500",type:"seeder",width:3.5,power:85,speed:9,fuel:8,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова сівалка — Amazone D9 4500",type:"seeder",width:4.5,power:115,speed:9,fuel:10,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова сівалка — Amazone Citan 8000",type:"seeder",width:8,power:230,speed:10,fuel:17,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова сівалка — Amazone Citan 12000",type:"seeder",width:12,power:310,speed:10,fuel:24,crops:["пшениця","ячмінь","жито","овес"]},
+
+{name:"Зернова сівалка — Horsch Pronto 3 DC",type:"seeder",width:3,power:95,speed:10,fuel:8,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова сівалка — Horsch Pronto 4 DC",type:"seeder",width:4,power:125,speed:10,fuel:10,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова сівалка — Horsch Pronto 6 DC",type:"seeder",width:6,power:180,speed:10,fuel:14,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова сівалка — Horsch Pronto 8 DC",type:"seeder",width:8,power:235,speed:10,fuel:18,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова сівалка — Horsch Pronto 9 DC",type:"seeder",width:9,power:270,speed:10,fuel:21,crops:["пшениця","ячмінь","жито","овес"]},
+
+{name:"Зернова сівалка — Väderstad Rapid 400",type:"seeder",width:4,power:125,speed:10,fuel:10,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова сівалка — Väderstad Rapid 500",type:"seeder",width:5,power:155,speed:10,fuel:12,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова сівалка — Väderstad Rapid 600",type:"seeder",width:6,power:185,speed:10,fuel:14,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова сівалка — Väderstad Rapid 800",type:"seeder",width:8,power:245,speed:10,fuel:18,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова сівалка — Väderstad Rapid A 600",type:"seeder",width:6,power:200,speed:10,fuel:15,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова сівалка — Väderstad Rapid A 800",type:"seeder",width:8,power:270,speed:10,fuel:20,crops:["пшениця","ячмінь","жито","овес"]},
+
+/* =========================
+   СІВАЛКИ КУКУРУДЗИ
+========================= */
+
+{name:"Сівалка кукурудзяна — John Deere 1725 8 рядків",type:"seeder",width:6,power:145,speed:9,fuel:13,crops:["кукурудза"]},
+{name:"Сівалка кукурудзяна — John Deere 1725 12 рядків",type:"seeder",width:9,power:210,speed:9,fuel:18,crops:["кукурудза"]},
+{name:"Сівалка кукурудзяна — John Deere 1725 16 рядків",type:"seeder",width:12,power:280,speed:9,fuel:24,crops:["кукурудза"]},
+{name:"Сівалка кукурудзяна — John Deere 1775NT 12 рядків",type:"seeder",width:9,power:220,speed:9,fuel:19,crops:["кукурудза"]},
+{name:"Сівалка кукурудзяна — John Deere 1775NT 16 рядків",type:"seeder",width:12,power:290,speed:9,fuel:25,crops:["кукурудза"]},
+{name:"Сівалка кукурудзяна — Monosem NG Plus 4",type:"seeder",width:3,power:90,speed:9,fuel:9,crops:["кукурудза"]},
+{name:"Сівалка кукурудзяна — Monosem NG Plus 6",type:"seeder",width:4.5,power:120,speed:9,fuel:12,crops:["кукурудза"]},
+{name:"Сівалка кукурудзяна — Monosem NG Plus 8",type:"seeder",width:6,power:155,speed:9,fuel:14,crops:["кукурудза"]},
+{name:"Сівалка кукурудзяна — Monosem NG Plus 12",type:"seeder",width:9,power:220,speed:9,fuel:19,crops:["кукурудза"]},
+{name:"Сівалка кукурудзяна — Kverneland Optima 8",type:"seeder",width:6,power:155,speed:9,fuel:14,crops:["кукурудза"]},
+{name:"Сівалка кукурудзяна — Kverneland Optima 12",type:"seeder",width:9,power:225,speed:9,fuel:20,crops:["кукурудза"]},
+{name:"Сівалка кукурудзяна — Kverneland Optima TFprofi 16",type:"seeder",width:12,power:310,speed:9,fuel:26,crops:["кукурудза"]},
+
+/* =========================
+   СІВАЛКИ СОНЯШНИКУ
+========================= */
+
+{name:"Сівалка соняшникова — John Deere 1725 8 рядків",type:"seeder",width:6,power:140,speed:9,fuel:12,crops:["соняшник"]},
+{name:"Сівалка соняшникова — John Deere 1725 12 рядків",type:"seeder",width:9,power:200,speed:9,fuel:17,crops:["соняшник"]},
+{name:"Сівалка соняшникова — John Deere 1725 16 рядків",type:"seeder",width:12,power:275,speed:9,fuel:23,crops:["соняшник"]},
+{name:"Сівалка соняшникова — Monosem NG Plus 8 рядків",type:"seeder",width:6,power:145,speed:9,fuel:13,crops:["соняшник"]},
+{name:"Сівалка соняшникова — Monosem NG Plus 12 рядків",type:"seeder",width:9,power:210,speed:9,fuel:18,crops:["соняшник"]},
+{name:"Сівалка соняшникова — Kverneland Optima 8",type:"seeder",width:6,power:150,speed:9,fuel:13,crops:["соняшник"]},
+{name:"Сівалка соняшникова — Kverneland Optima 12",type:"seeder",width:9,power:215,speed:9,fuel:19,crops:["соняшник"]},
+
+/* =========================
+   ЗЕРНОВІ ЖАТКИ
+========================= */
+
+{name:"Зернова жатка — John Deere 625X",type:"header",width:7.6,power:220,speed:6,fuel:57,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова жатка — John Deere 630X",type:"header",width:9.1,power:275,speed:6,fuel:65,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова жатка — John Deere 635X",type:"header",width:10.7,power:325,speed:6,fuel:72,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова жатка — John Deere 740FD",type:"header",width:12.2,power:390,speed:6,fuel:81,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова жатка — Claas Vario 620",type:"header",width:6.2,power:180,speed:6,fuel:52,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова жатка — Claas Vario 770",type:"header",width:7.7,power:240,speed:6,fuel:59,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова жатка — Claas Vario 930",type:"header",width:9.3,power:290,speed:6,fuel:66,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова жатка — Claas Vario 1080",type:"header",width:10.8,power:340,speed:6,fuel:74,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова жатка — New Holland Varifeed 25",type:"header",width:7.6,power:230,speed:6,fuel:58,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова жатка — New Holland Varifeed 30",type:"header",width:9.1,power:280,speed:6,fuel:66,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова жатка — New Holland Varifeed 35",type:"header",width:10.7,power:330,speed:6,fuel:73,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Зернова жатка — New Holland Varifeed 41",type:"header",width:12.5,power:390,speed:6,fuel:83,crops:["пшениця","ячмінь","жито","овес"]},
+
+/* =========================
+   ЖАТКИ КУКУРУДЗИ
+========================= */
+
+{name:"Кукурудзяна жатка — John Deere 608C 6 рядків",type:"header",width:4.5,power:180,speed:5.5,fuel:50,crops:["кукурудза"]},
+{name:"Кукурудзяна жатка — John Deere 612C 12 рядків",type:"header",width:9,power:290,speed:5.5,fuel:67,crops:["кукурудза"]},
+{name:"Кукурудзяна жатка — John Deere 616C 16 рядків",type:"header",width:12,power:390,speed:5.5,fuel:82,crops:["кукурудза"]},
+{name:"Кукурудзяна жатка — Capello Quasar 6",type:"header",width:4.5,power:175,speed:5.5,fuel:49,crops:["кукурудза"]},
+{name:"Кукурудзяна жатка — Capello Quasar 8",type:"header",width:6,power:220,speed:5.5,fuel:56,crops:["кукурудза"]},
+{name:"Кукурудзяна жатка — Capello Quasar 10",type:"header",width:7.5,power:280,speed:5.5,fuel:64,crops:["кукурудза"]},
+{name:"Кукурудзяна жатка — Capello Quasar 12",type:"header",width:9,power:330,speed:5.5,fuel:72,crops:["кукурудза"]},
+{name:"Кукурудзяна жатка — Geringhoff Rota Disc 6",type:"header",width:4.5,power:180,speed:5.5,fuel:50,crops:["кукурудза"]},
+{name:"Кукурудзяна жатка — Geringhoff Rota Disc 8",type:"header",width:6,power:230,speed:5.5,fuel:57,crops:["кукурудза"]},
+{name:"Кукурудзяна жатка — Geringhoff Rota Disc 12",type:"header",width:9,power:350,speed:5.5,fuel:74,crops:["кукурудза"]},
+
+/* =========================
+   ЖАТКИ СОНЯШНИКУ
+========================= */
+
+{name:"Соняшникова жатка — Capello Helianthus 6",type:"header",width:6,power:200,speed:5.5,fuel:53,crops:["соняшник"]},
+{name:"Соняшникова жатка — Capello Helianthus 8",type:"header",width:8,power:260,speed:5.5,fuel:61,crops:["соняшник"]},
+{name:"Соняшникова жатка — Capello Helianthus 10",type:"header",width:10,power:320,speed:5.5,fuel:69,crops:["соняшник"]},
+{name:"Соняшникова жатка — Capello Helianthus 12",type:"header",width:12,power:390,speed:5.5,fuel:78,crops:["соняшник"]},
+{name:"Соняшникова жатка — Capello Helianthus 15",type:"header",width:15,power:480,speed:5.5,fuel:91,crops:["соняшник"]},
+{name:"Соняшникова жатка — Geringhoff SunLite 8",type:"header",width:8,power:250,speed:5.5,fuel:60,crops:["соняшник"]},
+{name:"Соняшникова жатка — Geringhoff SunLite 10",type:"header",width:10,power:315,speed:5.5,fuel:68,crops:["соняшник"]},
+{name:"Соняшникова жатка — Geringhoff SunLite 12",type:"header",width:12,power:385,speed:5.5,fuel:77,crops:["соняшник"]},
+{name:"Соняшникова жатка — Geringhoff SunLite 15",type:"header",width:15,power:475,speed:5.5,fuel:90,crops:["соняшник"]},
+{name:"Соняшникова жатка — Oros Sun 8",type:"header",width:8,power:250,speed:5.5,fuel:60,crops:["соняшник"]},
+{name:"Соняшникова жатка — Oros Sun 10",type:"header",width:10,power:315,speed:5.5,fuel:68,crops:["соняшник"]},
+{name:"Соняшникова жатка — Oros Sun 12",type:"header",width:12,power:385,speed:5.5,fuel:77,crops:["соняшник"]},
+
+/* =========================
+   FLEX ЖАТКИ
+========================= */
+
+{name:"Flex жатка — MacDon FD75 9,1 м",type:"header",width:9.1,power:275,speed:6,fuel:64,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Flex жатка — MacDon FD75 10,7 м",type:"header",width:10.7,power:330,speed:6,fuel:73,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Flex жатка — MacDon FD140 12,2 м",type:"header",width:12.2,power:390,speed:6,fuel:82,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Flex жатка — Honey Bee AirFlex 25",type:"header",width:7.6,power:230,speed:6,fuel:58,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Flex жатка — Honey Bee AirFlex 30",type:"header",width:9.1,power:280,speed:6,fuel:66,crops:["пшениця","ячмінь","жито","овес"]},
+{name:"Flex жатка — Honey Bee AirFlex 35",type:"header",width:10.7,power:330,speed:6,fuel:74,crops:["пшениця","ячмінь","жито","овес"]},
+
+/* =========================
+   ЖАТКИ РІПАКУ
+========================= */
+
+{name:"Жатка ріпакова — 6 м",type:"header",width:6,power:180,speed:6,fuel:52,crops:["ріпак"]},
+{name:"Жатка ріпакова — 7,5 м",type:"header",width:7.5,power:225,speed:6,fuel:58,crops:["ріпак"]},
+{name:"Жатка ріпакова — 9 м",type:"header",width:9,power:275,speed:6,fuel:65,crops:["ріпак"]},
+{name:"Жатка ріпакова — 10,5 м",type:"header",width:10.5,power:325,speed:6,fuel:72,crops:["ріпак"]},
+
+/* =========================
+   КОСАРКИ
+========================= */
+
+{name:"Косарка — Krone EasyCut R 320",type:"mower",width:3.2,power:75,speed:10,fuel:9},
+{name:"Косарка — Krone EasyCut R 360",type:"mower",width:3.6,power:90,speed:10,fuel:10},
+{name:"Косарка — Krone EasyCut R 450",type:"mower",width:4.5,power:120,speed:10,fuel:12},
+{name:"Косарка — Krone EasyCut 6210 CV",type:"mower",width:6.2,power:150,speed:10,fuel:16},
+{name:"Косарка — Krone EasyCut 9000 CV",type:"mower",width:9,power:220,speed:10,fuel:23},
+{name:"Косарка — Kuhn GMD 3123 F",type:"mower",width:3.1,power:75,speed:10,fuel:9},
+{name:"Косарка — Kuhn GMD 4411",type:"mower",width:4.4,power:115,speed:10,fuel:12},
+{name:"Косарка — Kuhn GMD 9530",type:"mower",width:9.5,power:230,speed:10,fuel:24},
+
+/* =========================
+   ПРЕСИ
+========================= */
+
+{name:"Прес-підбирач — Krone Fortima F 1250",type:"baler",width:2.2,power:100,speed:8,fuel:10},
+{name:"Прес-підбирач — Krone Comprima F 155 XC",type:"baler",width:2.2,power:120,speed:8,fuel:12},
+{name:"Прес-підбирач — John Deere 460M",type:"baler",width:2.2,power:100,speed:8,fuel:10},
+{name:"Прес-підбирач — John Deere V451R",type:"baler",width:2.2,power:120,speed:8,fuel:12},
+{name:"Прес-підбирач — New Holland Roll Baler 125",type:"baler",width:2.2,power:110,speed:8,fuel:11},
+{name:"Прес-підбирач — Vicon RV 5216",type:"baler",width:2.2,power:115,speed:8,fuel:11}
+];
+/* =========================================================
+   ТИПИ ОПЕРАЦІЙ
+========================================================= */
+
+const stageTypes=[
+
+{
+name:"Оранка",
+type:"plow",
+crop:null,
+description:"Виконати основну оранку поля."
+},
+
+{
+name:"Культивація",
+type:"cultivator",
+crop:null,
+description:"Підготувати поле до наступної операції."
+},
+
+{
+name:"Дискування",
+type:"disc",
+crop:null,
+description:"Виконати поверхневий обробіток поля."
+},
+
+{
+name:"Посів пшениці",
+type:"seeder",
+crop:"пшениця",
+description:"Провести посів пшениці."
+},
+
+{
+name:"Посів ячменю",
+type:"seeder",
+crop:"ячмінь",
+description:"Провести посів ячменю."
+},
+
+{
+name:"Посів кукурудзи",
+type:"seeder",
+crop:"кукурудза",
+description:"Провести посів кукурудзи."
+},
+
+{
+name:"Посів соняшнику",
+type:"seeder",
+crop:"соняшник",
+description:"Провести посів соняшнику."
+},
+
+{
+name:"Збирання пшениці",
+type:"header",
+crop:"пшениця",
+description:"Зібрати врожай пшениці."
+},
+
+{
+name:"Збирання ячменю",
+type:"header",
+crop:"ячмінь",
+description:"Зібрати врожай ячменю."
+},
+
+{
+name:"Збирання кукурудзи",
+type:"header",
+crop:"кукурудза",
+description:"Зібрати врожай кукурудзи."
+},
+
+{
+name:"Збирання соняшнику",
+type:"header",
+crop:"соняшник",
+description:"Зібрати врожай соняшнику."
+}
+
+];
+
+
+/* =========================================================
+   СТАН
+========================================================= */
+
+let tasks=[[],[]];
+
+let taskIndex=0;
+
+let stageIndex=0;
+
+let journal=[];
+
+
+/* =========================================================
+   RANDOM
+========================================================= */
+
+function random(min,max){
+
+    return Math.random()*(max-min)+min;
+
+}
+
+function pick(arr){
+
+    return arr[
+        Math.floor(
+            Math.random()*arr.length
+        )
+    ];
+
+}
+
+function rnd(n,d=1){
+
+    return Number(
+        n.toFixed(d)
+    );
+
+}
+
+function formatTime(hours){
+
+    let h=Math.floor(hours);
+
+    let m=Math.round(
+        (hours-h)*60
+    );
+
+    if(m>=60){
+
+        h++;
+
+        m=0;
+
+    }
+
+    return `${h} год ${m} хв`;
+
+}
+
+
+/* =========================================================
+   ПОЛЕ
+========================================================= */
+
+function createField(){
+
+    const shape=pick([
+        "Квадратне",
+        "Прямокутне",
+        "Неправильної форми"
+    ]);
+
+    const area=random(18,72);
+
+    let length;
+
+    let width;
+
+
+    if(shape==="Квадратне"){
+
+        length=
+            Math.sqrt(
+                area*10000
+            );
+
+        width=length;
+
+    }
+
+    else if(shape==="Прямокутне"){
+
+        const ratio=
+            random(1.5,2.8);
+
+        width=
+            Math.sqrt(
+                area*10000/ratio
+            );
+
+        length=
+            width*ratio;
+
+    }
+
+    else{
+
+        width=
+            random(180,420);
+
+        length=
+            area*10000/
+            width;
+
+    }
+
+
+    return {
+
+        shape,
+
+        area:rnd(area,1),
+
+        length:rnd(length),
+
+        width:rnd(width),
+
+        direction:pick([
+            "Північ → Південь",
+            "Південь → Північ",
+            "Захід → Схід",
+            "Схід → Захід"
+        ])
+
+    };
+
+}
+
+
+/* =========================================================
+   РЕАЛІСТИЧНІ ЛІМІТИ
+========================================================= */
+
+function calculateBase(stage,field){
+
+    const possible=
+        equipment.filter(
+            x=>x.type===stage.type
+        );
+
+
+    const sample=
+        possible[
+            Math.floor(
+                possible.length/2
+            )
+        ];
+
+
+    const machine=
+        stage.type==="header"
+
+        ?
+
+        combines.find(
+            x=>x.power>=sample.power
+        ) || combines[0]
+
+        :
+
+        tractors.find(
+            x=>x.power>=sample.power
+        ) || tractors[0];
+
+
+    let efficiency=.85;
+
+
+    if(field.shape==="Квадратне")
+        efficiency=.89;
+
+    if(field.shape==="Прямокутне")
+        efficiency=.86;
+
+    if(field.shape==="Неправильної форми")
+        efficiency=.75;
+
+
+    let productivity=
+        sample.width*
+        sample.speed*
+        efficiency/
+        10;
+
+
+    let fuelHour=
+        machine.fuel;
+
+
+    if(stage.type==="cultivator")
+        fuelHour*=.62;
+
+    if(stage.type==="disc")
+        fuelHour*=.70;
+
+    if(stage.type==="seeder")
+        fuelHour*=.53;
+
+    if(stage.type==="plow")
+        fuelHour*=.95;
+
+    if(stage.type==="header")
+        fuelHour*=.95;
+
+
+    let load=
+        sample.power/
+        machine.power;
+
+
+    fuelHour*=
+        .88+
+        Math.min(load,1)*.16;
+
+
+    let time=
+        field.area/
+        productivity;
+
+
+    let fuel=
+        fuelHour*time;
+
+
+    let fuelHa=
+        fuel/
+        field.area;
+
+
+    let km=
+        field.area*10000/
+        (
+            sample.width*
+            efficiency
+        )/
+        1000;
+
+
+    return {
+
+        fuelHaLimit:rnd(
+            fuelHa*random(1.10,1.18),
+            1
+        ),
+
+        fuelLimit:rnd(
+            fuel*random(1.10,1.18),
+            1
+        ),
+
+        timeLimit:rnd(
+            time*random(1.10,1.20),
+            2
+        ),
+
+        distanceLimit:rnd(
+            km*random(1.10,1.18),
+            1
+        )
+
+    };
+
+}
+
+
+/* =========================================================
+   ЕТАП
+========================================================= */
+
+function createStage(){
+
+    const base=pick(
+        stageTypes
+    );
+
+    const field=
+        createField();
+
+    const limits=
+        calculateBase(
+            base,
+            field
+        );
+
+
+    return {
+
+        ...base,
+
+        field,
+
+        ...limits,
+
+        accepted:false,
+
+        score:0,
+
+        calculation:null,
+
+        machineType:
+            "tractor",
+
+        selectedMachine:0,
+
+        selectedImplement:0
+
+    };
+
+}
+
+
+/* =========================================================
+   ГЕНЕРАЦІЯ
+========================================================= */
+
+function generateTasks(){
+
+    tasks=[
+        [],
+        []
+    ];
+
+
+    for(
+        let i=0;
+        i<4;
+        i++
+    ){
+
+        tasks[0].push(
+            createStage()
+        );
+
+    }
+
+
+    for(
+        let i=0;
+        i<7;
+        i++
+    ){
+
+        tasks[1].push(
+            createStage()
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   НОВА ГРА
+========================================================= */
+
+function newGame(){
+
+    generateTasks();
+
+    taskIndex=0;
+
+    stageIndex=0;
+
+    journal=[];
+
+    document
+        .getElementById("finalBox")
+        .classList
+        .add("hidden");
+
+    render();
+
+    renderJournal();
+
+}
+
+
+/* =========================================================
+   ЗМІНА ЗАВДАННЯ
+========================================================= */
+
+function switchTask(index){
+
+    taskIndex=index;
+
+    stageIndex=0;
+
+    document
+        .getElementById("tab0")
+        .classList
+        .toggle(
+            "active",
+            index===0
+        );
+
+    document
+        .getElementById("tab1")
+        .classList
+        .toggle(
+            "active",
+            index===1
+        );
+
+    render();
+
+}
+
+
+/* =========================================================
+   ТИП ТЕХНІКИ
+========================================================= */
+
+function setMachineType(type){
+
+    const stage=
+        tasks[taskIndex][stageIndex];
+
+
+    /* після завершення змінювати
+       техніку не дозволяємо */
+
+    if(stage.accepted)
+        return;
+
+
+    stage.machineType=type;
+
+    stage.selectedMachine=0;
+
+    renderCurrentStage();
+
+}
+
+
+/* =========================================================
+   РЕНДЕР
+========================================================= */
+
+function render(){
+
+    renderStages();
+
+    renderCurrentStage();
+
+    updateTotals();
+
+}
+
+
+/* =========================================================
+   ЕТАПИ
+========================================================= */
+
+function renderStages(){
+
+    const box=
+        document.getElementById(
+            "stageList"
+        );
+
+    box.innerHTML="";
+
+
+    tasks[taskIndex].forEach(
+        (stage,index)=>{
+
+            const btn=
+                document.createElement(
+                    "button"
+                );
+
+
+            btn.className=
+                "stage-btn";
+
+
+            if(index===stageIndex)
+                btn.classList.add(
+                    "active"
+                );
+
+
+            if(stage.accepted){
+
+                if(stage.score>=70)
+                    btn.classList.add(
+                        "done"
+                    );
+                else
+                    btn.classList.add(
+                        "bad"
+                    );
+
+            }
+
+
+            btn.innerHTML=`
+
+                <b>
+                    ${index+1}.
+                    ${stage.name}
+                </b>
+
+                <span class="small">
+
+                    ${
+                        stage.accepted
+                        ?
+                        `Завершено — ${stage.score}/100`
+                        :
+                        "Не завершено"
+                    }
+
+                </span>
+            `;
+
+
+            btn.onclick=()=>{
+
+                stageIndex=index;
+
+                render();
+
+            };
+
+
+            box.appendChild(btn);
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ПОТОЧНИЙ ЕТАП
+========================================================= */
+
+function renderCurrentStage(){
+
+    const stage=
+        tasks[taskIndex][stageIndex];
+
+
+    document
+        .getElementById("stageTitle")
+        .textContent=
+        `Етап ${stageIndex+1}: ${stage.name}`;
+
+
+    document
+        .getElementById("stageDescription")
+        .textContent=
+        stage.description;
+
+
+    document
+        .getElementById("shape")
+        .textContent=
+        stage.field.shape;
+
+
+    document
+        .getElementById("area")
+        .textContent=
+        stage.field.area;
+
+
+    document
+        .getElementById("length")
+        .textContent=
+        stage.field.length;
+
+
+    document
+        .getElementById("width")
+        .textContent=
+        stage.field.width;
+
+
+    document
+        .getElementById("crop")
+        .textContent=
+        stage.crop || "—";
+
+
+    document
+        .getElementById("direction")
+        .textContent=
+        stage.field.direction;
+
+
+    document
+        .getElementById("fuelLimit")
+        .textContent=
+        stage.fuelLimit+" л";
+
+
+    document
+        .getElementById("timeLimit")
+        .textContent=
+        formatTime(
+            stage.timeLimit
+        );
+
+
+    document
+        .getElementById("distanceLimit")
+        .textContent=
+        stage.distanceLimit+" км";
+
+
+    document
+        .getElementById("fuelHaLimit")
+        .textContent=
+        stage.fuelHaLimit+" л/га";
+
+
+    drawField(
+        stage.field
+    );
+
+
+    updateMachineButtons(
+        stage
+    );
+
+
+    fillMachines(
+        stage
+    );
+
+
+    fillEquipment(
+        stage
+    );
+
+
+    document
+        .getElementById("machine")
+        .value=
+        stage.selectedMachine;
+
+
+    document
+        .getElementById("implement")
+        .value=
+        stage.selectedImplement;
+
+
+    calculate();
+
+
+    const accept=
+        document
+            .getElementById(
+                "acceptBtn"
+            );
+
+
+    if(stage.accepted){
+
+        accept.disabled=true;
+
+        accept.textContent=
+            "🔒 Етап уже завершено";
+
+        accept.classList.add(
+            "locked"
+        );
+
+        showResult(stage);
+
+    }
+    else{
+
+        accept.disabled=false;
+
+        accept.textContent=
+            "✅ Завершити етап";
+
+        accept.classList.remove(
+            "locked"
+        );
+
+
+        const result=
+            document.getElementById(
+                "result"
+            );
+
+        result.className="result";
+
+        result.innerHTML="";
+
+    }
+
+}
+
+
+/* =========================================================
+   КНОПКИ ТРАКТОР / КОМБАЙН
+========================================================= */
+
+function updateMachineButtons(stage){
+
+    const tractor=
+        document.getElementById(
+            "tractorBtn"
+        );
+
+    const combine=
+        document.getElementById(
+            "combineBtn"
+        );
+
+
+    tractor.className=
+        stage.machineType==="tractor"
+        ?
+        "green active"
+        :
+        "gray";
+
+
+    combine.className=
+        stage.machineType==="combine"
+        ?
+        "green active"
+        :
+        "gray";
+
+
+    tractor.disabled=
+        stage.accepted;
+
+
+    combine.disabled=
+        stage.accepted;
+
+}
+
+
+/* =========================================================
+   ПОЛЕ
+========================================================= */
+
+function drawField(field){
+
+    let svg="";
+
+
+    if(field.shape==="Квадратне"){
+
+        svg=`
+
+        <svg viewBox="0 0 500 260">
+
+            <rect
+                x="140"
+                y="25"
+                width="220"
+                height="210"
+                fill="#a9d18e"
+                stroke="#416c35"
+                stroke-width="4"
+            />
+
+            <text
+                x="250"
+                y="252"
+                text-anchor="middle">
+
+                ${field.length} ×
+                ${field.width} м
+
+            </text>
+
+        </svg>
+
+        `;
+
+    }
+
+
+    else if(
+        field.shape==="Прямокутне"
+    ){
+
+        svg=`
+
+        <svg viewBox="0 0 500 260">
+
+            <rect
+                x="40"
+                y="90"
+                width="420"
+                height="90"
+                fill="#a9d18e"
+                stroke="#416c35"
+                stroke-width="4"
+            />
+
+            <text
+                x="250"
+                y="70"
+                text-anchor="middle">
+
+                ${field.length} м
+
+            </text>
+
+            <text
+                x="250"
+                y="215"
+                text-anchor="middle">
+
+                ${field.width} м
+
+            </text>
+
+        </svg>
+
+        `;
+
+    }
+
+
+    else{
+
+        svg=`
+
+        <svg viewBox="0 0 500 260">
+
+            <polygon
+                points="
+                55,195
+                80,70
+                160,30
+                330,50
+                450,110
+                410,215
+                230,235
+                110,220"
+                fill="#a9d18e"
+                stroke="#416c35"
+                stroke-width="4"
+            />
+
+            <text
+                x="250"
+                y="250"
+                text-anchor="middle">
+
+                Неправильна форма поля
+
+            </text>
+
+        </svg>
+
+        `;
+
+    }
+
+
+    document
+        .getElementById(
+            "fieldShape"
+        )
+        .innerHTML=svg;
+
+}
+
+
+/* =========================================================
+   ТЕХНІКА
+========================================================= */
+
+function fillMachines(stage){
+
+    const select=
+        document.getElementById(
+            "machine"
+        );
+
+
+    select.innerHTML="";
+
+
+    const list=
+        stage.machineType==="tractor"
+        ?
+        tractors
+        :
+        combines;
+
+
+    list.forEach(
+        (machine,index)=>{
+
+            const option=
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value=index;
+
+
+            option.textContent=
+                `${machine.name} — ${machine.power} к.с.`;
+
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
+
+
+    select.disabled=
+        stage.accepted;
+
+}
+
+
+/* =========================================================
+   ОБЛАДНАННЯ
+========================================================= */
+
+function fillEquipment(stage){
+
+    const select=
+        document.getElementById(
+            "implement"
+        );
+
+
+    select.innerHTML="";
+
+
+    /*
+       ВАЖЛИВО:
+
+       тут НЕМАЄ filter по stage.type.
+
+       Виводиться ВСЯ база обладнання.
+    */
+
+
+    equipment.forEach(
+        (item,index)=>{
+
+            const option=
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value=index;
+
+
+            option.textContent=
+                `${item.name} — ${item.power} к.с. — ${item.width} м`;
+
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
+
+
+    select.disabled=
+        stage.accepted;
+
+}
+
+
+/* =========================================================
+   РОЗРАХУНОК
+========================================================= */
+
+function calculate(){
+
+    if(!tasks.length)
+        return;
+
+
+    const stage=
+        tasks[taskIndex][stageIndex];
+
+
+    const machineIndex=
+        Number(
+            document
+                .getElementById(
+                    "machine"
+                )
+                .value
+        );
+
+
+    const equipmentIndex=
+        Number(
+            document
+                .getElementById(
+                    "implement"
+                )
+                .value
+        );
+
+
+    const machine=
+        stage.machineType==="tractor"
+        ?
+        tractors[machineIndex]
+        :
+        combines[machineIndex];
+
+
+    const implement=
+        equipment[equipmentIndex];
+
+
+    if(!machine || !implement)
+        return;
+
+
+    stage.selectedMachine=
+        machineIndex;
+
+
+    stage.selectedImplement=
+        equipmentIndex;
+
+
+    let efficiency=.85;
+
+
+    if(
+        stage.field.shape===
+        "Квадратне"
+    )
+        efficiency=.89;
+
+
+    if(
+        stage.field.shape===
+        "Прямокутне"
+    )
+        efficiency=.86;
+
+
+    if(
+        stage.field.shape===
+        "Неправильної форми"
+    )
+        efficiency=.75;
+
+
+    let speed=
+        implement.speed;
+
+
+    const powerRatio=
+        machine.power/
+        implement.power;
+
+
+    /*
+       Якщо потужності недостатньо —
+       швидкість сильно падає.
+    */
+
+    if(powerRatio<1){
+
+        speed*=
+            Math.max(
+                .45,
+                powerRatio
+            );
+
+    }
+
+
+    /*
+       Надлишкова потужність
+       НЕ дає великого бонусу до швидкості.
+
+       Це закриває лазейку:
+       "візьму найпотужніший трактор
+       і легко пройду ліміт часу".
+    */
+
+    else{
+
+        speed*=
+            Math.min(
+                1.04,
+                1+
+                (powerRatio-1)*.018
+            );
+
+    }
+
+
+    speed=
+        Math.max(
+            2.5,
+            Math.min(
+                speed,
+                12
+            )
+        );
+
+
+    let productivity=
+        implement.width*
+        speed*
+        efficiency/
+        10;
+
+
+    let fuelHour=
+        machine.fuel;
+
+
+    if(
+        implement.type==="cultivator"
+    )
+        fuelHour*=.62;
+
+
+    if(
+        implement.type==="disc"
+    )
+        fuelHour*=.70;
+
+
+    if(
+        implement.type==="seeder"
+    )
+        fuelHour*=.53;
+
+
+    if(
+        implement.type==="plow"
+    )
+        fuelHour*=.95;
+
+
+    if(
+        implement.type==="header"
+    )
+        fuelHour*=.95;
+
+
+    /*
+       Навантаження.
+    */
+
+    const load=
+        implement.power/
+        machine.power;
+
+
+    if(load>1){
+
+        fuelHour*=
+            1+
+            Math.min(
+                .55,
+                (load-1)*.8
+            );
+
+    }
+
+    else{
+
+        fuelHour*=
+            .88+
+            load*.12;
+
+    }
+
+
+    /*
+       При дуже потужному тракторі
+       паливо не стає чарівно низьким.
+    */
+
+    const excess=
+        Math.max(
+            0,
+            (
+                machine.power-
+                implement.power
+            )/
+            implement.power
+        );
+
+
+    if(excess>.10){
+
+        fuelHour*=
+            1+
+            Math.min(
+                .12,
+                (excess-.10)*.08
+            );
+
+    }
+
+
+    if(
+        stage.field.shape===
+        "Неправильної форми"
+    ){
+
+        fuelHour*=1.06;
+
+        productivity*=.94;
+
+    }
+
+
+    const time=
+        stage.field.area/
+        productivity;
+
+
+    const totalFuel=
+        fuelHour*
+        time;
+
+
+    const fuelHa=
+        totalFuel/
+        stage.field.area;
+
+
+    const km=
+        stage.field.area*
+        10000/
+        (
+            implement.width*
+            efficiency
+        )/
+        1000;
+
+
+    const reserve=
+        (
+            machine.power-
+            implement.power
+        )/
+        implement.power*
+        100;
+
+
+    stage.calculation={
+
+        machine,
+
+        implement,
+
+        requiredPower:
+            implement.power,
+
+        speed,
+
+        productivity,
+
+        fuelHour,
+
+        time,
+
+        totalFuel,
+
+        fuelHa,
+
+        km,
+
+        reserve
+
+    };
+
+
+    /*
+       ПОКАЗУЄМО РОЗРАХУНОК,
+       АЛЕ НЕ ПОКАЗУЄМО ПРАВИЛЬНІСТЬ.
+    */
+
+
+    document
+        .getElementById(
+            "machinePower"
+        )
+        .textContent=
+        machine.power+
+        " к.с.";
+
+
+    document
+        .getElementById(
+            "neededPower"
+        )
+        .textContent=
+        implement.power+
+        " к.с.";
+
+
+    document
+        .getElementById(
+            "workingWidth"
+        )
+        .textContent=
+        implement.width+
+        " м";
+
+
+    document
+        .getElementById(
+            "powerReserve"
+        )
+        .textContent=
+        (
+            reserve>=0
+            ? "+"
+            :
+            ""
+        )+
+        rnd(reserve,1)+
+        "%";
+
+
+    document
+        .getElementById(
+            "speed"
+        )
+        .textContent=
+        rnd(speed,1)+
+        " км/год";
+
+
+    document
+        .getElementById(
+            "productivity"
+        )
+        .textContent=
+        rnd(productivity,2)+
+        " га/год";
+
+
+    document
+        .getElementById(
+            "fuelHour"
+        )
+        .textContent=
+        rnd(fuelHour,1)+
+        " л/год";
+
+
+    document
+        .getElementById(
+            "fuelHa"
+        )
+        .textContent=
+        rnd(fuelHa,1)+
+        " л/га";
+
+
+    document
+        .getElementById(
+            "fuelTotal"
+        )
+        .textContent=
+        rnd(totalFuel,1)+
+        " л";
+
+
+    document
+        .getElementById(
+            "workTime"
+        )
+        .textContent=
+        formatTime(time);
+
+
+    document
+        .getElementById(
+            "workKm"
+        )
+        .textContent=
+        rnd(km,1)+
+        " км";
+
+
+    const percent=
+        totalFuel/
+        stage.fuelLimit*
+        100;
+
+
+    document
+        .getElementById(
+            "fuelPercent"
+        )
+        .textContent=
+        rnd(percent,0)+
+        "%";
+
+
+    document
+        .getElementById(
+            "fuelBar"
+        )
+        .style.width=
+        Math.min(
+            percent,
+            100
+        )+
+        "%";
+
+}
+
+
+/* =========================================================
+   ОЦІНЮВАННЯ
+========================================================= */
+
+function evaluate(stage){
+
+    const d=
+        stage.calculation;
+
+
+    let score=100;
+
+    const errors=[];
+
+
+    /*
+       1. НЕПРАВИЛЬНА ТЕХНІКА:
+       ТРАКТОР / КОМБАЙН
+
+       Це окрема суттєва помилка.
+    */
+
+    if(
+        stage.type==="header" &&
+        stage.machineType!=="combine"
+    ){
+
+        score-=40;
+
+        errors.push(
+            "Для збирання врожаю вибрано трактор замість комбайна."
+        );
+
+    }
+
+
+    if(
+        stage.type!=="header" &&
+        stage.machineType!=="tractor"
+    ){
+
+        score-=40;
+
+        errors.push(
+            "Для польової операції вибрано комбайн замість трактора."
+        );
+
+    }
+
+
+    /*
+       2. ПОТУЖНІСТЬ
+    */
+
+    if(
+        d.machine.power<
+        d.requiredPower
+    ){
+
+        score-=50;
+
+        errors.push(
+            `Недостатня потужність: `+
+            `${d.machine.power} к.с. `+
+            `при необхідних `+
+            `${d.requiredPower} к.с.`
+        );
+
+    }
+
+    else{
+
+        const excess=
+            (
+                d.machine.power-
+                d.requiredPower
+            )/
+            d.requiredPower*
+            100;
+
+
+        /*
+           ДО 10% — ІДЕАЛЬНО
+        */
+
+        if(excess<=10){
+
+        }
+
+
+        /*
+           10–20%
+        */
+
+        else if(excess<=20){
+
+            score-=5;
+
+            errors.push(
+                `Надлишок потужності ${rnd(excess,1)}%.`
+            );
+
+        }
+
+
+        /*
+           20–40%
+        */
+
+        else if(excess<=40){
+
+            score-=10;
+
+            errors.push(
+                `Значний надлишок потужності ${rnd(excess,1)}%.`
+            );
+
+        }
+
+
+        /*
+           40–80%
+        */
+
+        else if(excess<=80){
+
+            score-=18;
+
+            errors.push(
+                `Великий надлишок потужності ${rnd(excess,1)}%.`
+            );
+
+        }
+
+
+        /*
+           ПОНАД 80%
+        */
+
+        else{
+
+            score-=30;
+
+            errors.push(
+                `Суттєве перевищення потужності ${rnd(excess,1)}%.`
+            );
+
+        }
+
+    }
+
+
+    /*
+       3. КУЛЬТУРА / ОБЛАДНАННЯ
+    */
+
+    if(
+        (
+            stage.type==="header" ||
+            stage.type==="seeder"
+        ) &&
+        d.implement.crops &&
+        !d.implement.crops.includes(
+            stage.crop
+        )
+    ){
+
+        score-=25;
+
+        errors.push(
+            `Обране обладнання не відповідає культурі "${stage.crop}".`
+        );
+
+    }
+
+
+    /*
+       Якщо для оранки обрали
+       жатку / сівалку / інше —
+       теж помилка.
+    */
+
+    if(
+        d.implement.type!==
+        stage.type
+    ){
+
+        score-=25;
+
+        errors.push(
+            `Обладнання "${d.implement.name}" `+
+            `не призначене для операції "${stage.name}".`
+        );
+
+    }
+
+
+    /*
+       4. РОЗХІД НА ГЕКТАР
+    */
+
+    if(
+        d.fuelHa>
+        stage.fuelHaLimit
+    ){
+
+        const over=
+            (
+                d.fuelHa-
+                stage.fuelHaLimit
+            )/
+            stage.fuelHaLimit*
+            100;
+
+
+        score-=
+            Math.min(
+                20,
+                Math.max(
+                    2,
+                    Math.ceil(
+                        over/5
+                    )
+                )
+            );
+
+
+        errors.push(
+            `Розхід ${rnd(d.fuelHa,1)} л/га `+
+            `перевищує допустимі `+
+            `${stage.fuelHaLimit} л/га.`
+        );
+
+    }
+
+
+    /*
+       5. ЗАГАЛЬНЕ ПАЛИВО
+    */
+
+    if(
+        d.totalFuel>
+        stage.fuelLimit
+    ){
+
+        score-=15;
+
+        errors.push(
+            `Загальна витрата ${rnd(d.totalFuel,1)} л `+
+            `перевищує ліміт ${stage.fuelLimit} л.`
+        );
+
+    }
+
+
+    /*
+       6. ЧАС
+    */
+
+    if(
+        d.time>
+        stage.timeLimit
+    ){
+
+        score-=10;
+
+        errors.push(
+            `Час ${formatTime(d.time)} `+
+            `перевищує ліміт `+
+            `${formatTime(stage.timeLimit)}.`
+        );
+
+    }
+
+
+    /*
+       7. ВІДСТАНЬ
+    */
+
+    if(
+        d.km>
+        stage.distanceLimit
+    ){
+
+        score-=10;
+
+        errors.push(
+            `Відстань ${rnd(d.km,1)} км `+
+            `перевищує допустимі `+
+            `${stage.distanceLimit} км.`
+        );
+
+    }
+
+
+    return {
+
+        score:
+            Math.max(
+                0,
+                Math.round(score)
+            ),
+
+        errors
+
+    };
+
+}
+
+
+/* =========================================================
+   ЗАВЕРШЕННЯ ЕТАПУ
+========================================================= */
+
+function finishStage(){
+
+    const stage=
+        tasks[taskIndex][stageIndex];
+
+
+    /*
+       ГОЛОВНИЙ ЗАХИСТ:
+
+       якщо вже завершений —
+       функція взагалі нічого не робить.
+    */
+
+    if(stage.accepted)
+        return;
+
+
+    calculate();
+
+
+    if(!stage.calculation)
+        return;
+
+
+    const evaluation=
+        evaluate(stage);
+
+
+    stage.accepted=true;
+
+    stage.score=
+        evaluation.score;
+
+
+    journal=
+        journal.filter(
+            row=>!(
+                row.task===
+                taskIndex+1 &&
+                row.stage===
+                stageIndex+1
+            )
+        );
+
+
+    journal.push({
+
+        task:
+            taskIndex+1,
+
+        stage:
+            stageIndex+1,
+
+        name:
+            stage.name,
+
+        machine:
+            stage.calculation
+                .machine.name,
+
+        implement:
+            stage.calculation
+                .implement.name,
+
+        fuel:
+            stage.calculation
+                .totalFuel,
+
+        time:
+            stage.calculation
+                .time,
+
+        km:
+            stage.calculation
+                .km,
+
+        fuelHa:
+            stage.calculation
+                .fuelHa,
+
+        score:
+            stage.score
+
+    });
+
+
+    showResult(stage);
+
+
+    renderStages();
+
+    renderJournal();
+
+    updateTotals();
+
+    renderCurrentStage();
+
+    checkFinished();
+
+}
+
+
+/* =========================================================
+   РЕЗУЛЬТАТ
+========================================================= */
+
+function showResult(stage){
+
+    const result=
+        document.getElementById(
+            "result"
+        );
+
+
+    const evaluation=
+        evaluate(stage);
+
+
+    result.className=
+        "result show";
+
+
+    if(evaluation.score>=80)
+        result.classList.add(
+            "good"
+        );
+
+    else if(
+        evaluation.score>=50
+    )
+        result.classList.add(
+            "warning"
+        );
+
+    else
+        result.classList.add(
+            "bad"
+        );
+
+
+    let html=
+
+        `<h3>
+            Результат етапу:
+            ${evaluation.score}/100
+        </h3>`;
+
+
+    if(
+        evaluation.errors.length===0
+    ){
+
+        html+=`
+
+        <p
+        style="color:#16803c;font-weight:bold">
+
+        ✅ Етап виконано правильно.
+
+        </p>
+
+        `;
+
+    }
+
+    else{
+
+        html+=`
+
+        <p>
+        <b>Виявлені помилки:</b>
+        </p>
+
+        <ul class="error-list">
+
+        `;
+
+
+        evaluation.errors.forEach(
+            error=>{
+
+                html+=
+                    `<li>${error}</li>`;
+
+            }
+        );
+
+
+        html+=
+            `</ul>`;
+
+    }
+
+
+    html+=`
+
+    <hr>
+
+    <p>
+        <b>Тип техніки:</b>
+        ${
+            stage.machineType==="tractor"
+            ?
+            "Трактор"
+            :
+            "Комбайн"
+        }
+    </p>
+
+    <p>
+        <b>Техніка:</b>
+        ${stage.calculation.machine.name}
+    </p>
+
+    <p>
+        <b>Обладнання:</b>
+        ${stage.calculation.implement.name}
+    </p>
+
+    <p>
+        <b>Потужність техніки:</b>
+        ${stage.calculation.machine.power} к.с.
+    </p>
+
+    <p>
+        <b>Потрібна потужність:</b>
+        ${stage.calculation.requiredPower} к.с.
+    </p>
+
+    <p>
+        <b>Запас потужності:</b>
+        ${rnd(stage.calculation.reserve,1)}%
+    </p>
+
+    <p>
+        <b>Загальна витрата палива:</b>
+        ${rnd(stage.calculation.totalFuel,1)} л
+    </p>
+
+    <p>
+        <b>Розхід на гектар:</b>
+        ${rnd(stage.calculation.fuelHa,1)} л/га
+    </p>
+
+    <p>
+        <b>Час виконання:</b>
+        ${formatTime(stage.calculation.time)}
+    </p>
+
+    <p>
+        <b>Пройдена відстань:</b>
+        ${rnd(stage.calculation.km,1)} км
+    </p>
+
+    `;
+
+
+    result.innerHTML=
+        html;
+
+}
+
+
+/* =========================================================
+   СКИДАННЯ
+========================================================= */
+
+function resetCurrentStage(){
+
+    const stage=
+        tasks[taskIndex][stageIndex];
+
+
+    /*
+       Завершений етап НЕ МОЖНА
+       скидати.
+
+       Це також захищає від
+       повторного проходження.
+    */
+
+    if(stage.accepted){
+
+        alert(
+            "Цей етап уже завершено. "+
+            "Повторно змінити або завершити його не можна."
+        );
+
+        return;
+
+    }
+
+
+    render();
+
+}
+
+
+/* =========================================================
+   ЗАГАЛЬНІ ПОКАЗНИКИ
+========================================================= */
+
+function updateTotals(){
+
+    let fuel=0;
+
+    let time=0;
+
+    let km=0;
+
+
+    tasks.forEach(
+        task=>{
+
+            task.forEach(
+                stage=>{
+
+                    if(
+                        stage.accepted &&
+                        stage.calculation
+                    ){
+
+                        fuel+=
+                            stage.calculation
+                                .totalFuel;
+
+                        time+=
+                            stage.calculation
+                                .time;
+
+                        km+=
+                            stage.calculation
+                                .km;
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    document
+        .getElementById(
+            "totalFuel"
+        )
+        .textContent=
+        rnd(fuel,1)+
+        " л";
+
+
+    document
+        .getElementById(
+            "totalTime"
+        )
+        .textContent=
+        formatTime(time);
+
+
+    document
+        .getElementById(
+            "totalKm"
+        )
+        .textContent=
+        rnd(km,1)+
+        " км";
+
+}
+
+
+/* =========================================================
+   ЖУРНАЛ
+========================================================= */
+
+function renderJournal(){
+
+    const body=
+        document.getElementById(
+            "journal"
+        );
+
+
+    body.innerHTML="";
+
+
+    journal.forEach(
+        row=>{
+
+            const tr=
+                document.createElement(
+                    "tr"
+                );
+
+
+            tr.innerHTML=`
+
+            <td>
+                ${row.task}
+            </td>
+
+            <td>
+                ${row.stage}.
+                ${row.name}
+            </td>
+
+            <td>
+                ${row.machine}
+            </td>
+
+            <td>
+                ${row.implement}
+            </td>
+
+            <td>
+                ${rnd(row.fuel,1)} л
+            </td>
+
+            <td>
+                ${formatTime(row.time)}
+            </td>
+
+            <td>
+                ${rnd(row.km,1)} км
+            </td>
+
+            <td>
+                ${rnd(row.fuelHa,1)} л/га
+            </td>
+
+            <td>
+                ${row.score}/100
+            </td>
+
+            `;
+
+
+            body.appendChild(
+                tr
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ФІНАЛ
+========================================================= */
+
+function checkFinished(){
+
+    let complete=true;
+
+
+    tasks.forEach(
+        task=>{
+
+            task.forEach(
+                stage=>{
+
+                    if(
+                        !stage.accepted
+                    )
+                        complete=false;
+
+                }
+            );
+
+        }
+    );
+
+
+    if(!complete)
+        return;
+
+
+    let total=0;
+
+    let count=0;
+
+
+    tasks.forEach(
+        task=>{
+
+            task.forEach(
+                stage=>{
+
+                    total+=
+                        stage.score;
+
+                    count++;
+
+                }
+
+            );
+
+        }
+    );
+
+
+    const average=
+        total/count;
+
+
+    let grade;
+
+
+    if(average>=97)
+        grade=12;
+
+    else if(average>=93)
+        grade=11;
+
+    else if(average>=88)
+        grade=10;
+
+    else if(average>=82)
+        grade=9;
+
+    else if(average>=75)
+        grade=8;
+
+    else if(average>=68)
+        grade=7;
+
+    else if(average>=60)
+        grade=6;
+
+    else if(average>=50)
+        grade=5;
+
+    else if(average>=40)
+        grade=4;
+
+    else if(average>=30)
+        grade=3;
+
+    else if(average>=20)
+        grade=2;
+
+    else
+        grade=1;
+
+
+    document
+        .getElementById(
+            "finalBox"
+        )
+        .classList
+        .remove(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "finalScore"
+        )
+        .textContent=
+        grade;
+
+
+    let text;
+
+
+    if(grade>=11)
+        text=
+            "Відмінний результат!";
+
+    else if(grade>=9)
+        text=
+            "Дуже добре!";
+
+    else if(grade>=7)
+        text=
+            "Добрий результат.";
+
+    else if(grade>=5)
+        text=
+            "Задовільний результат.";
+
+    else
+        text=
+            "Потрібно повторити матеріал.";
+
+
+    document
+        .getElementById(
+            "finalText"
+        )
+        .textContent=
+        text;
+
+
+    document
+        .getElementById(
+            "finalDetails"
+        )
+        .textContent=
+
+        `Середній результат: `+
+        `${rnd(average,1)}/100. `+
+        `Виконано ${count} етапів. `+
+        `Підсумкова оцінка: ${grade}/12.`;
+
+}
+
+
+/* =========================================================
+   ЗАПУСК
+========================================================= */
+
+newGame();
+
+</script>
+
+</body>
+</html>
